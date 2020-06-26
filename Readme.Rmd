@@ -1,0 +1,44 @@
+---
+title: "Анализ зависимости количества обращений пользователей от числа обслуживаемых рабочих мест"
+author: "Тушавин В. А."
+date: "10 05 2020"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Анализ зависимости количества обращений пользователей от числа обслуживаемых рабочих мест
+
+Целью анализа является верификация модели, выявлеющей закономерность в количестве обращений пользователей от числа обслуживаемых рабочих мест.
+
+```{r}
+library(readxl)
+SCandPC.raw <- read_excel("Data.xlsx")
+dim(SCandPC.raw)
+head(SCandPC.raw)
+```
+# Регрессионный анализ
+
+Проведем анализ только по всем предприятиям, для чего просуммируем данные по всем предприятиям для каждого периода и построим линейную модель КМНК.
+
+```{r}
+SCandPC.sum<-aggregate(cbind(PC,SC)~Month+Year,data=SCandPC.raw,sum)
+dim(SCandPC.sum)
+head(SCandPC.sum)
+summary(lm0<-lm(SC~PC-1,data=SCandPC.sum))
+oldpar<-par(mfrow=c(2,2))
+plot(lm0)
+par(oldpar)
+```
+Проведем тесты на авторегерессию и гетероскедатичность
+
+```{r}
+library(car)
+acf(residuals(lm0))
+ncvTest(lm0)
+```
+
